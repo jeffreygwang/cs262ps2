@@ -4,6 +4,8 @@ import threading
 from sockets import *
 import time
 
+INT_SIZE = 4
+
 class Machine:
   clock_rate = 0
   logical_clock = 0
@@ -31,7 +33,7 @@ class Machine:
 
     while True:
       s, _ = server_socket.accept()
-      threading.Thread(target=self.client_loop, args=(s,))
+      threading.Thread(target=self.client_loop, args=(s,)).start()
 
   def start_interactive_thread(self):
     while True:
@@ -44,9 +46,9 @@ class Machine:
 
   def client_loop(self, s):
     while True:
-      new_clock = receive_sized_int(s, 1)
+      new_clock = receive_sized_int(s, INT_SIZE)
       self.queue_lock.acquire()
-      queue.append(new_clock)
+      self.queue.append(new_clock)
       self.queue_lock.release()
 
   def run_cycle(self):
@@ -61,15 +63,15 @@ class Machine:
       action = random.randint(1, 10)
       if action == 1 and len(self.connected_sockets_as_client) >= 1:
         s = self.connected_sockets_as_client[0]
-        send_sized_int(s, self.logical_clock, 1)
+        send_sized_int(s, self.logical_clock, INT_SIZE)
         self.logical_clock += 1
       elif action == 2 and len(self.connected_sockets_as_client) >= 2:
         s = self.connected_sockets_as_client[1]
-        send_sized_int(s, self.logical_clock, 1)
+        send_sized_int(s, self.logical_clock, INT_SIZE)
         self.logical_clock += 1
       elif action == 3:
         for s in self.connected_sockets_as_client:
-          send_sized_int(s, self.logical_clock, 1)
+          send_sized_int(s, self.logical_clock, INT_SIZE)
         self.logical_clock += 1
       else:
         self.logical_clock += 1
