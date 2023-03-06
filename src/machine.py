@@ -27,10 +27,19 @@ class Machine:
   # A list of sockets that this socket is a client for.
   connected_sockets_as_client = []
 
+  # stop running (non-interactive mode)
+  kill_flag = threading.Event()
+
+  # whether or not interactive
+  interactive = False
+
   # Initializes a new `Machine` with a random clock rate.
-  def __init__(self):
+  def __init__(self, interactive=False):
     self.clock_rate = random.randint(1, MAX_CLOCK_RATE)
+    print(f"This machine's random clock rate: {self.clock_rate}")
     self.queue_lock = threading.Lock()
+    self.kill_flag.clear()
+    self.interactive = interactive
 
   # Starts the machine's server and begins running the experiment.
   def start(self, port, logfile):
@@ -43,7 +52,8 @@ class Machine:
     threading.Thread(target=self.start_network_thread, args=(port,)).start()
 
     # Prompt the user to enter other clients.
-    threading.Thread(target=self.start_interactive_thread, args=()).start()
+    if self.interactive:
+      threading.Thread(target=self.start_interactive_thread, args=()).start()
 
     # Start the action cycle.
     threading.Timer(1 / self.clock_rate, self.run_cycle).start()
@@ -78,10 +88,25 @@ class Machine:
       new_port = input('The port: ')
       s.connect((new_address, int(new_port)))
       self.connected_sockets_as_client.append(s)
-      print('Added.')
+      print(f"Added {new_address}:{new_port}")
+
+  # Add connections in non-interactive mode.
+  def add_nonint_connections(self, addresses, ports):
+    if len(addresses) != len(ports):
+      print("len(addresses) != len(ports.)")
+      return
+
+    for i in range(len(addresses)):
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.connect((addresses[i], int(ports[i])))
+      self.connected_sockets_as_client.append(s)
+      print(f"Added {addresses[i]}:{ports[i]}")
 
   # Runs a single cycle of the machine's clock rate.
   def run_cycle(self):
+    if self.kill_flag.is_set():
+      return
+
     self.queue_lock.acquire()
 
     if len(self.queue) > 0:
