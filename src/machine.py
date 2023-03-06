@@ -9,37 +9,34 @@ MAX_CLOCK_RATE = 6
 
 # A machine with a logical clock that sends actions to at most 2 other machines.
 class Machine:
-  # The number of actions per second, determined randomly at initialization,
-  clock_rate = 0
-
-  # The local value of the logical clock for this machine.
-  logical_clock = 0
-
-  # The path to the log file for this machine.
-  logfile = None
-
-  # Queued logical clock updates received from other machines.
-  queue = []
-
-  # A mutex used to lock the `queue` list.
-  queue_lock = None
-
-  # A list of sockets that this socket is a client for.
-  connected_sockets_as_client = []
-
-  # stop running (non-interactive mode)
-  kill_flag = threading.Event()
-
-  # whether or not interactive
-  interactive = False
-
   # Initializes a new `Machine` with a random clock rate.
-  def __init__(self, interactive=False):
+  def __init__(self, interactive=True):
+    # The number of actions per second, determined randomly at initialization,
     self.clock_rate = random.randint(1, MAX_CLOCK_RATE)
-    print(f"This machine's random clock rate: {self.clock_rate}")
+
+    # The local value of the logical clock for this machine.
+    self.logical_clock = 0
+
+    # The path to the log file for this machine.
+    self.logfile = None
+
+    # Queued logical clock updates received from other machines.
+    self.queue = []
+
+    # A mutex used to lock the `queue` list.
     self.queue_lock = threading.Lock()
-    self.kill_flag.clear()
+
+    # A list of sockets that this socket is a client for.
+    self.connected_sockets_as_client = []
+
+    # stop running (non-interactive mode)
+    self.kill_flag = threading.Event()
+
+    # Whether or not the machine should prompt for inputs
     self.interactive = interactive
+
+    print(f"This machine's random clock rate: {self.clock_rate}")
+    self.kill_flag.clear()
 
   # Starts the machine's server and begins running the experiment.
   def start(self, port, logfile):
