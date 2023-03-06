@@ -34,7 +34,7 @@ class Machine:
   interactive = False
 
   # Initializes a new `Machine` with a random clock rate.
-  def __init__(self, interactive=False):
+  def __init__(self, interactive=True):
     self.clock_rate = random.randint(1, MAX_CLOCK_RATE)
     print(f"This machine's random clock rate: {self.clock_rate}")
     self.queue_lock = threading.Lock()

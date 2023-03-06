@@ -1,3 +1,5 @@
+import sys
+
 def receive_sized_int(s, size: int) -> int:
   """
   Convert [size] bytes to big-endian int.
@@ -13,7 +15,7 @@ def receive_sized(s, size: int) -> bytes:
   while True:
     try:
       msg = s.recv(size)
-    except: # this happens when the thread running the program is killed by the watchdog
+    except: # when sockert closed
       sys.exit(0)
 
     combined += msg
