@@ -10,9 +10,9 @@ MAX_CLOCK_RATE = 6
 # A machine with a logical clock that sends actions to at most 2 other machines.
 class Machine:
   # Initializes a new `Machine` with a random clock rate.
-  def __init__(self, interactive=True):
+  def __init__(self, interactive=True, clock_rate=None):
     # The number of actions per second, determined randomly at initialization,
-    self.clock_rate = random.randint(1, MAX_CLOCK_RATE)
+    self.clock_rate = clock_rate if clock_rate else random.randint(1, MAX_CLOCK_RATE)
 
     # The local value of the logical clock for this machine.
     self.logical_clock = 0
@@ -35,7 +35,7 @@ class Machine:
     # Whether or not the machine should prompt for inputs
     self.interactive = interactive
 
-    print(f"This machine's random clock rate: {self.clock_rate}")
+    print(f"This machine's clock rate: {self.clock_rate}")
     self.kill_flag.clear()
 
   # Starts the machine's server and begins running the experiment.
