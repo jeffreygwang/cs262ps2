@@ -8,17 +8,21 @@ import sys
 EXECUTION_TIME = 60
 NUM_MACHINES = 8
 
-logfiles = [f"l{i}.txt" for i in range(NUM_MACHINES)]
+# Initialize log file locations.
+logfiles = [f"log-{i}.txt" for i in range(NUM_MACHINES)]
 
+# Choose a random port and compute port and host lists.
 rand_port = random.randint(8000, 28000)
 ports = [rand_port+i for i in range(NUM_MACHINES)]
 hosts = ['localhost' for i in range(NUM_MACHINES)]
 
+# Initialize machines on the chosen ports.
 print(f"Initializing machines on ports {ports}.")
 machines = [Machine(interactive=False) for i in range(NUM_MACHINES)]
 for i in range(len(machines)):
     machines[i].start(ports[i], logfiles[i])
 
+# Add non-interactive connections between each machine.
 print("Adding ports.")
 for i in range(len(machines)):
     ports_copy = copy.deepcopy(ports)
